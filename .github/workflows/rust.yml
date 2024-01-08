@@ -1,4 +1,4 @@
-name: Rust
+name: Build trojan-rs
 
 on:
   push:
@@ -10,15 +10,57 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  build-ubuntu-glibc:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: sudo apt-get install libipset-dev -y
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: build x86_64 Linux
+        run: |
+          sudo apt install libipset-dev -y >> /dev/null
+          rustup default nightly
+          rustup target add x86_64-unknown-linux-gnu
+          cargo build --target x86_64-unknown-linux-gnu --release --verbose
+          cp ./target/x86_64-unknown-linux-gnu/release/trojan ./trojan-x86_64-unknown-linux-gnu
+     
+      - name: Test build
+        run: |
+          ./trojan-x86_64-unknown-linux-gnu -h
+    
+      - name: build x86_64 Windows
+        run: |
+          sudo apt install gcc-mingw-w64 gcc-mingw-w64-x86-64 -y >> /dev/null
+          rustup target add x86_64-pc-windows-gnu
+          cargo build --target x86_64-pc-windows-gnu --release --verbose
+          cp ./target/x86_64-pc-windows-gnu/release/trojan.exe  ./trojan-x86_64-pc-windows-gnu.exe
+      
+      - name: Upload Artifacts
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
+        with:
+          path: |
+            trojan-x86_64-unknown-linux-gnu
+            trojan-x86_64-pc-windows-gnu.exe
+
+  build-windows-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Rustup From win.rustup.rs
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc
+      - name: Build x64 MSVC
+        shell: pwsh
+        run: |
+          rustup target add x86_64-pc-windows-msvc
+          cargo.exe build --target x86_64-pc-windows-msvc --release --verbose
+          Copy-Item -Path '.\target\x86_64-pc-windows-msvc\release\trojan.exe' -Destination trojan-x86_64-pc-windows-msvc.exe
+      - name: Upload Artifacts
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
+        with:
+          path: |
+            trojan-x86_64-pc-windows-msvc.exe
