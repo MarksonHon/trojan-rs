@@ -13,7 +13,7 @@ jobs:
   build-ubuntu-glibc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: build x86_64 Linux
@@ -36,7 +36,7 @@ jobs:
           cp ./target/x86_64-pc-windows-gnu/release/trojan.exe  ./trojan-x86_64-pc-windows-gnu.exe
       
       - name: Upload Artifacts
-        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.0
         with:
           path: |
             trojan-x86_64-unknown-linux-gnu
@@ -45,7 +45,7 @@ jobs:
   build-windows-msvc:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install Rustup From win.rustup.rs
@@ -60,7 +60,7 @@ jobs:
           cargo.exe build --target x86_64-pc-windows-msvc --release --verbose
           Copy-Item -Path '.\target\x86_64-pc-windows-msvc\release\trojan.exe' -Destination trojan-x86_64-pc-windows-msvc.exe
       - name: Upload Artifacts
-        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.o
         with:
           path: |
             trojan-x86_64-pc-windows-msvc.exe
