@@ -60,7 +60,7 @@ jobs:
           cargo.exe build --target x86_64-pc-windows-msvc --release --verbose
           Copy-Item -Path '.\target\x86_64-pc-windows-msvc\release\trojan.exe' -Destination trojan-x86_64-pc-windows-msvc.exe
       - name: Upload Artifacts
-        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.o
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.0
         with:
           path: |
             trojan-x86_64-pc-windows-msvc.exe
