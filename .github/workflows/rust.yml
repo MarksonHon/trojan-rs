@@ -36,12 +36,48 @@ jobs:
           cp ./target/x86_64-pc-windows-gnu/release/trojan.exe  ./trojan-x86_64-pc-windows-gnu.exe
       
       - name: Upload Artifacts
-        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.0
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
         with:
           path: |
             trojan-x86_64-unknown-linux-gnu
             trojan-x86_64-pc-windows-gnu.exe
-
+  build-alpine-musl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Alpine Linux for x86_64
+        uses: jirutka/setup-alpine@v1
+        with:
+          branch: edge
+          arch: x86_64
+          shell-name: alpine-x86_64.sh
+          packages: >
+            git
+            rustup
+            musl-dev
+            ipset
+            ipset-dev
+            clang-dev
+            llvm-dev
+            lld
+            lld-dev
+            libmnl
+            libmnl-dev
+            libmnl-static
+      - name: build x86_64 Linux
+        shell: alpine-x86_64.sh {0}
+        run: |
+          rustup-init --default-toolchain nightly -y
+          rustup target add x86_64-unknown-linux-musl
+          cargo build --target x86_64-unknown-linux-musl --release --verbose
+          cp ./target/x86_64-unknown-linux-musl/release/trojan ./trojan-x86_64-unknown-linux-musl
+      - name: Upload Artifacts
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
+        with:
+          path: |
+            trojan-x86_64-unknown-linux-musl
   build-windows-msvc:
     runs-on: windows-latest
     steps:
@@ -60,7 +96,7 @@ jobs:
           cargo.exe build --target x86_64-pc-windows-msvc --release --verbose
           Copy-Item -Path '.\target\x86_64-pc-windows-msvc\release\trojan.exe' -Destination trojan-x86_64-pc-windows-msvc.exe
       - name: Upload Artifacts
-        uses: nanoufo/action-upload-artifacts-and-release-assets@v2.0
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v1.5
         with:
           path: |
             trojan-x86_64-pc-windows-msvc.exe
